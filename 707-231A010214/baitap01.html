@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cửa Hàng Công Nghệ - Demo</title>
+    <style>
+        /* --- CSS: Styling & Responsive --- */
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --error-color: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        /* Search Bar Styling */
+        .search-wrapper {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+
+        #search-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* Grid Layout for Responsive Design */
+        .product-grid {
+            display: grid;
+            /* Tự động lấp đầy dòng, mỗi cột tối thiểu 250px */
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        /* Product Card Styling */
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: #ddd;
+        }
+
+        .product-info {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .product-desc {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 15px;
+        }
+
+        /* Error Message Styling */
+        .no-result {
+            text-align: center;
+            grid-column: 1 / -1; /* Chiếm toàn bộ chiều rộng lưới */
+            padding: 40px;
+            color: var(--error-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: #fee2e2;
+            border-radius: 8px;
+            display: none; /* Ẩn mặc định */
+        }
+
+        .no-result.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>🛍️ Cửa Hàng Thiết Bị Số</h1>
+            <div class="search-wrapper">
+                <input type="text" id="search-input" placeholder="Tìm kiếm sản phẩm (ví dụ: iPhone, Sony)...">
+            </div>
+        </header>
+
+        <main id="product-container" class="product-grid">
+            </main>
+
+        <div id="error-message" class="no-result">
+            😔 Rất tiếc, không tìm thấy sản phẩm nào phù hợp với từ khóa của bạn.
+        </div>
+    </div>
+
+    <script>
+        // --- JavaScript Logic ---
+
+        // 1. Dữ liệu mẫu (Array of Objects)
+        const products = [
+            {
+                id: 1,
+                name: "iPhone 15 Pro Max",
+                price: 34990000,
+                image: "https://placehold.co/300x200/1a1a1a/FFF?text=iPhone+15",
+                desc: "Titan tự nhiên, chip A17 Pro mạnh mẽ."
+            },
+            {
+                id: 2,
+                name: "Samsung Galaxy S24 Ultra",
+                price: 31000000,
+                image: "https://placehold.co/300x200/2563eb/FFF?text=Samsung+S24",
+                desc: "Quyền năng AI, camera 200MP."
+            },
+            {
+                id: 3,
+                name: "MacBook Air M2",
+                price: 24500000,
+                image: "https://placehold.co/300x200/e5e7eb/000?text=MacBook+Air",
+                desc: "Siêu mỏng nhẹ, pin trâu cả ngày."
+            },
+            {
+                id: 4,
+                name: "Sony WH-1000XM5",
+                price: 7990000,
+                image: "https://placehold.co/300x200/000/FFF?text=Sony+Headphone",
+                desc: "Tai nghe chống ồn chủ động hàng đầu."
+            },
+            {
+                id: 5,
+                name: "iPad Air 5 M1",
+                price: 13500000,
+                image: "https://placehold.co/300x200/8b5cf6/FFF?text=iPad+Air",
+                desc: "Sức mạnh chip M1, màn hình Liquid Retina."
+            },
+            {
+                id: 6,
+                name: "Bàn phím cơ Keychron K2",
+                price: 1850000,
+                image: "https://placehold.co/300x200/374151/FFF?text=Keychron",
+                desc: "Gõ sướng tay, kết nối 3 thiết bị."
+            }
+        ];
+
+        // DOM Elements
+        const productContainer = document.getElementById('product-container');
+        const searchInput = document.getElementById('search-input');
+        const errorMessage = document.getElementById('error-message');
+
+        // Hàm định dạng tiền tệ VND
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        };
+
+        // 2. Hàm hiển thị sản phẩm (Render Function)
+        function renderProducts(list) {
+            productContainer.innerHTML = ''; // Xóa nội dung cũ
+
+            if (list.length === 0) {
+                errorMessage.classList.add('active'); // Hiện lỗi
+                return;
+            } 
+            
+            errorMessage.classList.remove('active'); // Ẩn lỗi
+
+            list.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                
+                card.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" class="product-img">
+                    <div class="product-info">
+                        <div>
+                            <h3 class="product-name">${product.name}</h3>
+                            <p class="product-desc">${product.desc}</p>
+                        </div>
+                        <div class="product-price">${formatCurrency(product.price)}</div>
+                    </div>
+                `;
+                productContainer.appendChild(card);
+            });
+        }
+
+        // 3. Hàm xử lý tìm kiếm
+        function handleSearch(e) {
+            const keyword = e.target.value.toLowerCase().trim(); // Chuyển về chữ thường, bỏ khoảng trắng thừa
+
+            const filteredProducts = products.filter(product => {
+                // Tìm kiếm theo tên sản phẩm
+                return product.name.toLowerCase().includes(keyword);
+            });
+
+            renderProducts(filteredProducts);
+        }
+
+        // Khởi chạy lần đầu: Hiển thị tất cả sản phẩm
+        renderProducts(products);
+
+        // Gán sự kiện nhập liệu (Input Event cho Real-time search)
+        searchInput.addEventListener('input', handleSearch);
+
+    </script>
+</body>
+</html>
